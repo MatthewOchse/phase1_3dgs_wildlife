@@ -11,6 +11,21 @@ conda activate wildsplat
 pip install -e ".[dev]"
 ```
 
+## Quick Start
+
+```bash
+# Step 1 & 2: calibration (requires physical Charuco board and capture rig)
+python scripts/calibrate_intrinsics.py --camera-id cam0 --images-dir data/calibration/cam0 \
+    --output output/calibration --board-config configs/board.yaml
+python scripts/calibrate_rig.py --captures-dir data/calibration/rig_capture \
+    --intrinsics-dir output/calibration --output output/calibration/rig.json \
+    --board-config configs/board.yaml
+
+# Step 3: download and load the DANNCE markerless_mouse_1 dataset
+python scripts/setup_dannce_mm1.py
+python scripts/load_dannce_mm1.py --validate-triangulation
+```
+
 ## Directory Structure
 
 ```
@@ -21,19 +36,20 @@ phase1_3dgs_wildlife/
 │   ├── calibration/      # Calibration boards and results (gitignored)
 │   └── public/           # Downloaded public datasets (gitignored)
 ├── docs/
-│   ├── PROGRESS.md       # Weekly progress log
-│   ├── ALGORITHMS.md     # Algorithm explanations per step
-│   ├── DECISIONS.md      # Architecture Decision Records
-│   └── SETUP.md          # Environment setup notes
+│   ├── PROGRESS.md             # Weekly progress log
+│   ├── ALGORITHMS.md           # Algorithm explanations per step
+│   ├── DECISIONS.md            # Architecture Decision Records
+│   ├── SETUP.md                # Environment setup notes
+│   └── DATASET_DANNCE_MM1.md  # DANNCE dataset format documentation
 ├── notebooks/            # Exploratory Jupyter notebooks
 ├── output/               # Pipeline outputs (gitignored)
-├── scripts/              # One-off utility scripts
+├── scripts/              # CLI entry points and utilities
 ├── src/
 │   ├── calibration/      # Intrinsic and extrinsic calibration
 │   ├── features/         # Feature detection and matching
 │   ├── geometry/         # Triangulation and visual hull
-│   ├── io/               # Data loading and writing utilities
+│   ├── io_utils/         # Data loading — MultiViewCapture, DANNCE adapter
 │   ├── segmentation/     # SAM2, classical, and LiDAR segmentation
 │   └── sync/             # Multi-view frame synchronisation
-└── tests/                # Pytest test suite
+└── tests/                # Pytest test suite (pytest -m dataset for real-data tests)
 ```

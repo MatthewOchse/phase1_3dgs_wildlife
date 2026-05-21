@@ -67,7 +67,32 @@ The multi-view DLT is preferred over averaging pairwise `cv2.triangulatePoints` 
 
 ## Multi-view Synchronisation
 
-To be populated in [Step 3].
+### Hardware sync vs software sync
+
+**Hardware sync (genlock / frame-trigger pulses)** is the gold standard.  A shared electronic pulse — typically a TTL trigger from a dedicated controller or a camera configured as master — fires all camera sensors simultaneously within microseconds of each other.  DANNCE markerless_mouse_1 was captured this way: every camera receives the same trigger, so ``data_frame`` is simply ``[0, 1, 2, …, 17999]`` across all six cameras with zero residual drift.  There is nothing to correct; the frame indices are authoritative.
+
+**Software sync (audio cross-correlation)** is what we will use for our own Kruger field captures, where independent battery-powered cameras cannot be wired together.  The workflow is:
+
+1. A clap or electronic sync signal at the start of each take is captured by every camera's onboard microphone.
+2. The audio tracks are extracted via ``ffmpeg`` to temporary WAV files.
+3. ``scipy.signal.correlate`` computes the cross-correlation between each camera's audio and a reference (Camera 1).  Cross-correlation finds the lag τ that maximises ``∫ r(t) · c(t + τ) dt``.
+4. The peak of the cross-correlation function gives the sample lag; dividing by the sample rate converts it to seconds.
+5. Each camera's frame timestamps are shifted by this offset so all cameras share a common time origin.
+
+### Why cross-correlation works
+
+Cross-correlation is the continuous analogue of a sliding dot-product.  A loud, impulsive transient (clap) produces a sharp peak in the correlation function because the signal only aligns with itself at one specific lag.  Broader signals (e.g. ambient noise) produce a broad, ambiguous peak.  The clap's attack — the first few milliseconds of sharp onset — dominates the correlation and can typically localise synchronisation to within 1–2 audio samples, which at 44 100 Hz is about 0.02–0.05 ms — far tighter than any motion-capture application needs.
+
+### Expected sync tolerance by frame rate
+
+| Frame rate | Frame period | Acceptable residual | Notes |
+|-----------|-------------|---------------------|-------|
+| 100 fps | 10 ms | < 5 ms (½ frame) | DANNCE — hardware sync, residual ≈ 0 |
+| 50 fps | 20 ms | < 10 ms | Typical wildlife rigs |
+| 30 fps | 33 ms | < 16 ms | Adequate for slow subjects (elephant, rhino) |
+| 25 fps | 40 ms | < 20 ms | PAL standard cameras |
+
+For slow-moving subjects like elephants or rhinos, a residual of one full frame (33 ms at 30 fps) is often acceptable because the animal moves only a few millimetres between frames.  For fast motion (running mouse at 100 fps) even a half-frame error can cause detectable ghosting in the reconstructed point cloud.
 
 ## Image Segmentation
 
