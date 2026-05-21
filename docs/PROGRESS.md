@@ -2,7 +2,7 @@
 
 ## Week 1 — Project Scaffolding
 
-- Initialised repository structure with `src/` layout covering calibration, sync, segmentation, features, geometry, and io modules.
+- Initialised repository structure with `src/` layout covering calibration, sync, segmentation, features, geometry, and io_utils modules.
 - Created `pyproject.toml` with full dependency list and dev extras.
 - Set up conda environment `wildsplat` for the project.
 - Placeholder documentation written for algorithms and architecture decisions.
@@ -62,4 +62,4 @@
 
 ### Open questions
 - Camera1 and Camera4 have higher reprojection error (~0.8 px) than Camera3 and Camera5 (~0.14 px). This may reflect calibration quality differences in the original DANNCE data, not a loader bug.
-- The `src/io` → `src/io_utils` rename should be reflected in the README directory structure section.
+- The `src/io_utils` module name (renamed from `src/io` to avoid collision with Python's frozen built-in) is now reflected in the README directory structure.
