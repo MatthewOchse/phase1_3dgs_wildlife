@@ -44,4 +44,7 @@ target-version = ["py311"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=src --cov-report=term-missing"
+addopts = "--no-cov -m 'not dataset'"
+markers = [
+    "dataset: tests that require the real DANNCE dataset on disk (deselected by default; run with -m dataset to opt in)",
+]
