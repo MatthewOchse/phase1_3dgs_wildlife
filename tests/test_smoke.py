@@ -5,7 +5,7 @@ SUBMODULES = [
     "calibration",
     "sync",
     "segmentation",
-    "io",
+    "io_utils",
     "geometry",
     "features",
 ]
